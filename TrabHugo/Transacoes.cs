@@ -14,18 +14,18 @@ namespace TrabHugo
         public Transacoes()
         {
             this.nome = "Transacoes.txt";
-            this.cont = contarTrans();
+            this.cont = contar();
         }
 
         public Transacoes(String nome)
         {
             this.nome = nome;
-            this.cont = contarTrans();
+            this.cont = contar();
         }
 
 
-        // CONTA TODAS AS TRANSAÇÕES DO REGISTRO
-        public int contarTrans()
+        // CONTA TODAS AS TRANSAÇÕES
+        public int contar()
         {
             string[] linhas = { "" };
             try
@@ -34,13 +34,13 @@ namespace TrabHugo
             }
             catch (IOException e)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
             return linhas.Length;
         }
 
-        // LE UMA TRANSAÇÃO ESPECIFICA DO REGISTRO
-        public String lerTransacao(String data, String acao)
+        // LE UMA TRANSAÇÃO
+        public String ler(String data, String acao)
         {
             String resultado = "";
             try
@@ -64,20 +64,20 @@ namespace TrabHugo
             }
             catch (IOException e)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
             return resultado;
         }
 
-        // ENVIA A TRANSAÇÃO ATRAVÉS DA BOLSA DE VALORES AOS BROKERS INTERESSADOS
-        public void publicarTransacao(String transacao)
+        // ENVIA A TRANSAÇÃO
+        public void publicar(String transacao)
         {
             try
             {
                 String[] trans = transacao.Split(";");
                 String message = trans[2] + ";" + trans[3];
                 String topic = "transacao." + trans[1];
-                Bolsa.enviarNotificacoes(new String[] { topic, message });
+                Bolsa.enviar(new String[] { topic, message });
             }
             catch (Exception e)
             {
@@ -85,7 +85,7 @@ namespace TrabHugo
             }
         }
 
-        // GRAVA UMA TRANSAÇÃO NO REGISTRO
+        // GRAVA UMA TRANSAÇÃO
         public void gravar(String line)
         {
             try
@@ -94,9 +94,9 @@ namespace TrabHugo
             }
             catch (IOException ex)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
-            publicarTransacao(line);
+            publicar(line);
         }
     }
 }

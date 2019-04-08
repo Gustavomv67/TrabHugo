@@ -15,17 +15,17 @@ namespace TrabHugo
         public Arquivo()
         {
             this.nome = "bolsa.txt";
-            this.cont = contarAcoes();
+            this.cont = contar();
         }
 
         public Arquivo(String nome)
         {
             this.nome = nome;
-            this.cont = contarAcoes();
+            this.cont = contar();
         }
 
-        // CONTA TODAS AS AÇÕES DO REGISTRO
-        public int contarAcoes()
+        // CONTA TODAS AS AÇÕES
+        public int contar()
         {
             string[] linhas = { "" };
             try
@@ -34,12 +34,12 @@ namespace TrabHugo
             }
             catch (IOException e)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
             return linhas.Length;
         }
 
-        // LE TODAS AS AÇÕES DO REGISTRO
+        // LE TODAS AS AÇÕES
         public void ler()
         {
             try
@@ -52,12 +52,12 @@ namespace TrabHugo
             }
             catch (IOException e)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
         }
 
-        // VERIFICA SE UMA AÇÃO EXISTE NO REGISTRO
-        public bool existeAcao(String codigo)
+        // VERIFICA SE UMA AÇÃO EXISTE 
+        public bool existe(String codigo)
         {
             bool resultado = false;
             try
@@ -75,7 +75,7 @@ namespace TrabHugo
             }
             catch (IOException e)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
             return resultado;
         }

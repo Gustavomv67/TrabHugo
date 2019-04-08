@@ -17,16 +17,16 @@ namespace TrabHugo
         public Livro()
         {
             this.nome = "Livro.txt";
-            this.cont = contaOfertas();
+            this.cont = contar();
         }
 
         public Livro(String nome)
         {
             this.nome = nome;
-            this.cont = contaOfertas();
+            this.cont = contar();
         }
 
-        // LE TODAS AS OFERTAS DO REGISTRO
+        // LE TODAS AS OFERTAS
         public List<String> ler()
         {
             List<String> ofertas = new List<String>();
@@ -45,8 +45,8 @@ namespace TrabHugo
             return ofertas;
         }
 
-        // LE UMA OFERTA ESPECIFICA DO RESGISTRO
-        public String lerOferta(int fila)
+        // LE UMA OFERTA
+        public String ler(int fila)
         {
             String linha = null;
             try
@@ -61,8 +61,8 @@ namespace TrabHugo
             return linha;
         }
 
-        // CONTA TODAS AS OFERTAS DO REGISTRO
-        public int contaOfertas()
+        // CONTA TODAS AS OFERTAS
+        public int contar()
         {
             string[] linhas = { "" };
             try
@@ -71,12 +71,12 @@ namespace TrabHugo
             }
             catch (IOException e)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
             return linhas.Length;
         }
 
-        // GRAVA UMA OFERTA NO REGISTRO
+        // GRAVA UMA OFERTA
         public void gravar(String line)
         {
             try
@@ -85,12 +85,12 @@ namespace TrabHugo
             }
             catch (IOException ex)
             {
-                Console.WriteLine("Arquivo nÃ£o existe!");
+                Console.WriteLine("Arquivo não existe!");
             }
             checarTransacao(line);
         }
 
-        // REGRAVA AS OFERTAS DO REGISTRO, DESCONSIDERANDO UMA OFERTA ESPECIFICA
+        // REGRAVA AS OFERTAS
         public void regravar(String fila, int pos)
         {
             try
@@ -105,7 +105,7 @@ namespace TrabHugo
             }
         }
 
-        // DELETA OFERTAS MARCADAS PARA DELETAR DO REGISTRO
+        // DELETA OFERTAS
         public void deletar()
         {
             try
@@ -135,25 +135,25 @@ namespace TrabHugo
             }
         }
 
-        // CONSULTA UMA TRANSAÇÃO DO REGISTRO DE TRANSAÇÕES
-        public void consultarTransacao(String consulta)
+        // CONSULTA UMA TRANSAÇÃO
+        public void consultar(String consulta)
         {
             try
             {
-                String[] con = consulta.Split(";");
-                String resultado = trans.lerTransacao(con[2], con[1]);
+                String[] par = consulta.Split(";");
+                String resultado = trans.ler(par[2], par[1]);
                 String[] topicos = null;
                 if (resultado != "")
                 {
-                    resultado = con[0] + "." + con[1] + "," + resultado;
+                    resultado = par[0] + "." + par[1] + "," + resultado;
                     topicos = resultado.Split(",");
                 }
                 else
                 {
-                    resultado += con[0] + "." + con[1];
+                    resultado += par[0] + "." + par[1];
                     topicos = new String[] { resultado };
                 }
-                Bolsa.enviarNotificacoes(topicos);
+                Bolsa.enviar(topicos);
             }
             catch (Exception e)
             {
@@ -161,46 +161,45 @@ namespace TrabHugo
             }
         }
 
-        // CHECA SE UMA TRANSAÇÃO É POSSÍVEL E REALIZA ELA, ARMAZENANDO NO REGISTRO DE
-        // TRANSAÇÕES E ATUALIZANDO AS OFERTAS NO FINAL
+        // CHECA SE UMA TRANSAÇÃO É POSSÍVEL 
         public void checarTransacao(String oferta)
         {
-            bool alteracao = false;
-            String[] atrib = oferta.Split(";");
+            bool alterar = false;
+            String[] atributo = oferta.Split(";");
             List<String> ofertas = ler();
-            foreach (String o in ofertas)
+            foreach (String var in ofertas)
             {
-                int pos = ofertas.IndexOf(o);
+                int pos = ofertas.IndexOf(var);
                 int end = ofertas.IndexOf(oferta);
-                String[] of = o.Split(";");
-                if (of[1] == atrib[1])
+                String[] ofert = var.Split(";");
+                if (ofert[1] == atributo[1])
                 {
-                    if (of[0] == "venda" && atrib[0] == "compra" && (float.Parse(of[3]) <= float.Parse(atrib[3])))
+                    if (ofert[0] == "venda" && atributo[0] == "compra" && (float.Parse(ofert[3]) <= float.Parse(atributo[3])))
                     {
-                        alteracao = true;
-                        if (int.Parse(of[2]) > int.Parse(atrib[2]))
+                        alterar = true;
+                        if (int.Parse(ofert[2]) > int.Parse(atributo[2]))
                         {
-                            int resp = int.Parse(of[2]) - int.Parse(atrib[2]);
-                            of[2] = resp.ToString();
-                            String novaoferta = joinStrings(of, ";", 0);
+                            int resp = int.Parse(ofert[2]) - int.Parse(atributo[2]);
+                            ofert[2] = resp.ToString();
+                            String novaoferta = justaStrings(ofert, ";", 0);
                             regravar(novaoferta, pos);
                             regravar("deletado", end);
                             String data = getDateTime();
-                            String transacao = data + ";" + of[1] + ";" + atrib[2] + ";" + of[3] + ";" + atrib[4] + ";"
-                                    + of[4];
+                            String transacao = data + ";" + ofert[1] + ";" + atributo[2] + ";" + ofert[3] + ";" + atributo[4] + ";"
+                                    + ofert[4];
                             trans.gravar(transacao);
                             break;
                         }
-                        else if (int.Parse(of[2]) < int.Parse(atrib[2]))
+                        else if (int.Parse(ofert[2]) < int.Parse(atributo[2]))
                         {
-                            int resp = int.Parse(atrib[2]) - int.Parse(of[2]);
-                            atrib[2] = resp.ToString();
-                            String ofer = joinStrings(atrib, ";", 0);
-                            regravar(ofer, end);
+                            int resp = int.Parse(atributo[2]) - int.Parse(ofert[2]);
+                            atributo[2] = resp.ToString();
+                            String oferter = justaStrings(atributo, ";", 0);
+                            regravar(oferter, end);
                             regravar("deletado", pos);
                             String data = getDateTime();
-                            String transacao = data + ";" + of[1] + ";" + of[2] + ";" + of[3] + ";" + atrib[4] + ";"
-                                    + of[4];
+                            String transacao = data + ";" + ofert[1] + ";" + ofert[2] + ";" + ofert[3] + ";" + atributo[4] + ";"
+                                    + ofert[4];
                             trans.gravar(transacao);
                         }
                         else
@@ -208,38 +207,38 @@ namespace TrabHugo
                             regravar("deletado", pos);
                             regravar("deletado", end);
                             String data = getDateTime();
-                            String transacao = data + ";" + of[1] + ";" + atrib[2] + ";" + of[3] + ";" + atrib[4] + ";"
-                                    + of[4];
+                            String transacao = data + ";" + ofert[1] + ";" + atributo[2] + ";" + ofert[3] + ";" + atributo[4] + ";"
+                                    + ofert[4];
                             trans.gravar(transacao);
                             break;
                         }
                     }
-                    else if (of[0] == "compra" && atrib[0] == "venda" && (float.Parse(of[3]) >= float.Parse(atrib[3])))
+                    else if (ofert[0] == "compra" && atributo[0] == "venda" && (float.Parse(ofert[3]) >= float.Parse(atributo[3])))
                     {
-                        alteracao = true;
-                        if (int.Parse(of[2]) > int.Parse(atrib[2]))
+                        alterar = true;
+                        if (int.Parse(ofert[2]) > int.Parse(atributo[2]))
                         {
-                            int resp = int.Parse(of[2]) - int.Parse(atrib[2]);
-                            of[2] = resp.ToString();
-                            String novaoferta = joinStrings(of, ";", 0);
+                            int resp = int.Parse(ofert[2]) - int.Parse(atributo[2]);
+                            ofert[2] = resp.ToString();
+                            String novaoferta = justaStrings(ofert, ";", 0);
                             regravar(novaoferta, pos);
                             regravar("deletado", end);
                             String data = getDateTime();
-                            String transacao = data + ";" + of[1] + ";" + atrib[2] + ";" + of[3] + ";" + atrib[4] + ";"
-                                    + of[4];
+                            String transacao = data + ";" + ofert[1] + ";" + atributo[2] + ";" + ofert[3] + ";" + atributo[4] + ";"
+                                    + ofert[4];
                             trans.gravar(transacao);
                             break;
                         }
-                        else if (int.Parse(of[2]) < int.Parse(atrib[2]))
+                        else if (int.Parse(ofert[2]) < int.Parse(atributo[2]))
                         {
-                            int resp = int.Parse(atrib[2]) - int.Parse(of[2]);
-                            atrib[2] = resp.ToString();
-                            String ofer = joinStrings(atrib, ";", 0);
-                            regravar(ofer, end);
+                            int resp = int.Parse(atributo[2]) - int.Parse(ofert[2]);
+                            atributo[2] = resp.ToString();
+                            String oferter = justaStrings(atributo, ";", 0);
+                            regravar(oferter, end);
                             regravar("deletado", pos);
                             String data = getDateTime();
-                            String transacao = data + ";" + of[1] + ";" + of[2] + ";" + of[3] + ";" + atrib[4] + ";"
-                                    + of[4];
+                            String transacao = data + ";" + ofert[1] + ";" + ofert[2] + ";" + ofert[3] + ";" + atributo[4] + ";"
+                                    + ofert[4];
                             trans.gravar(transacao);
                         }
                         else
@@ -247,22 +246,22 @@ namespace TrabHugo
                             regravar("deletado", pos);
                             regravar("deletado", end);
                             String data = getDateTime();
-                            String transacao = data + ";" + of[1] + ";" + atrib[2] + ";" + of[3] + ";" + atrib[4] + ";"
-                                    + of[4];
+                            String transacao = data + ";" + ofert[1] + ";" + atributo[2] + ";" + ofert[3] + ";" + atributo[4] + ";"
+                                    + ofert[4];
                             trans.gravar(transacao);
                             break;
                         }
                     }
                 }
             }
-            if (alteracao)
+            if (alterar)
             {
                 deletar();
             }
         }
 
         // MÉTODO AUXILIAR
-        private String joinStrings(String[] strings, String delimiter, int startIndex)
+        private String justaStrings(String[] strings, String delimitador, int startIndex)
         {
             int length = strings.Length;
             if (length == 0)
@@ -272,7 +271,7 @@ namespace TrabHugo
             StringBuilder words = new StringBuilder(strings[startIndex]);
             for (int i = startIndex + 1; i < length; i++)
             {
-                words.Append(delimiter).Append(strings[i]);
+                words.Append(delimitador).Append(strings[i]);
             }
             return words.ToString();
         }

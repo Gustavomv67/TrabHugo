@@ -9,20 +9,15 @@ namespace TrabHugo
 {
     class Broker
     {
-        private static string EXCHANGE_NAME = "BOLSADEVALORES";
+        private static string EXCHANGE = "BOLSADEVALORES";
         private static String codigo = null;
 
-        static public void Main(String[] args)
+        static public void Main()
         {
-            int opcao = 0;
-            int quant = 0;
+            int opcao = 0, quant = 0;
             float valor = 0;
-            String data = null;
-            String nome = null;
-            String hora = null;
-            String opera = null;
+            string data = null, nome = null, hora = null, opera = null, lixo = null;
             Arquivo arq = new Arquivo();
-            String trash = null;
 
             Console.WriteLine("Digite o nome do Broker: ");
             nome = Console.ReadLine();
@@ -39,16 +34,16 @@ namespace TrabHugo
                 switch (opcao)
                 {
                     case 1:
-                        trash = Console.ReadLine();
+                        lixo = Console.ReadLine();
                         arq.ler();
-                        Console.WriteLine("\nDigite o código da ação a ser monitorada: ");
+                        Console.WriteLine("\nDigite o código da ação: ");
                         codigo = Console.ReadLine();
-                        while (!arq.existeAcao(codigo))
+                        while (!arq.existe(codigo))
                         {
-                            Console.WriteLine("\nEsse código não existe no sistema, digite outro: ");
+                            Console.WriteLine("\nEsse código não existe, digite outro: ");
                             codigo = Console.ReadLine();
                         }
-                        Console.WriteLine("\nDigite a operação a ser monitorada (compra, venda, transacao, *): ");
+                        Console.WriteLine("\nDigite a operação (compra, venda, transacao, *): ");
                         opera = Console.ReadLine();
                         while (opera != "compra" && opera != "venda" && opera != "transacao" && opera == "*")
                         {
@@ -59,56 +54,56 @@ namespace TrabHugo
                         new Thread(thread).Start();
                         break;
                     case 2:
-                        trash = Console.ReadLine();
+                        lixo = Console.ReadLine();
                         arq.ler();
 
-                        Console.WriteLine("\nDigite o código da ação a ser comprada: ");
+                        Console.WriteLine("\nDigite o código da ação: ");
                         codigo = Console.ReadLine();
-                        while (!arq.existeAcao(codigo))
+                        while (!arq.existe(codigo))
                         {
-                            Console.WriteLine("\nEsse código não existe no sistema, digite outro: ");
+                            Console.WriteLine("\nEsse código não existe, digite outro: ");
                             codigo = Console.ReadLine();
                         }
                         codigo = "compra." + codigo;
 
-                        Console.WriteLine("\nDigite a quantidade desejada: ");
+                        Console.WriteLine("\nDigite a quantidade: ");
                         quant = int.Parse(Console.ReadLine());
 
-                        Console.WriteLine("\nDigite o valor de cada ação: ");
+                        Console.WriteLine("\nDigite o valor das ações:");
                         valor = float.Parse(Console.ReadLine());
 
-                        enviarOperacao(new String[] { codigo, quant.ToString(), valor.ToString(), nome });
+                        enviar(new String[] { codigo, quant.ToString(), valor.ToString(), nome });
                         break;
                     case 3:
-                        trash = Console.ReadLine();
+                        lixo = Console.ReadLine();
                         arq.ler();
 
-                        Console.WriteLine("\nDigite o código da ação a ser vendida: ");
+                        Console.WriteLine("\nDigite o código da ação: ");
                         codigo = Console.ReadLine();
-                        while (!arq.existeAcao(codigo))
+                        while (!arq.existe(codigo))
                         {
-                            Console.WriteLine("\nEsse código não existe no sistema, digite outro: ");
+                            Console.WriteLine("\nEsse código não existe, digite outro: ");
                             codigo = Console.ReadLine();
                         }
                         codigo = "venda." + codigo;
 
-                        Console.WriteLine("\nDigite a quantidade desejada: ");
+                        Console.WriteLine("\nDigite a quantidade: ");
                         quant = int.Parse(Console.ReadLine());
 
-                        Console.WriteLine("\nDigite o valor de cada ação: ");
+                        Console.WriteLine("\nDigite o valor das ações: ");
                         valor = float.Parse(Console.ReadLine());
 
-                        enviarOperacao(new String[] { codigo, quant.ToString(), valor.ToString(), nome });
+                        enviar(new String[] { codigo, quant.ToString(), valor.ToString(), nome });
                         break;
                     case 4:
-                        trash = Console.ReadLine();
+                        lixo = Console.ReadLine();
                         arq.ler();
 
-                        Console.WriteLine("\nDigite o código da ação da qual deseja informações: ");
+                        Console.WriteLine("\nDigite o código da ação: ");
                         codigo = Console.ReadLine();
-                        while (!arq.existeAcao(codigo))
+                        while (!arq.existe(codigo))
                         {
-                            Console.WriteLine("\nEsse código não existe no sistema, digite outro: ");
+                            Console.WriteLine("\nEsse código não existe, digite outro: ");
                             codigo = Console.ReadLine();
                         }
                         codigo = "info." + codigo;
@@ -120,7 +115,7 @@ namespace TrabHugo
                         hora = Console.ReadLine();
 
                         String datahora = data + " " + hora;
-                        enviarOperacao(new String[] { codigo, datahora });
+                        enviar(new String[] { codigo, datahora });
                         break;
                     default:
                         break;
@@ -130,28 +125,28 @@ namespace TrabHugo
             } while (opcao != 0);
         }
 
-        // RECEBE NOTIFICAÇÕES DA BOLSA PERTINENTE AS AÇÕES DESEJADAS
-        public static void receberNotificacoes(String[] topicos)
+        // RECEBE NOTIFICAÇÕES
+        public static void receber(String[] topicos)
         {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
-            channel.ExchangeDeclare(EXCHANGE_NAME, "topic");
+            channel.ExchangeDeclare(EXCHANGE, "topic");
             string queueName = channel.QueueDeclare().QueueName;
 
 
             if (topicos.Length < 1)
             {
-                Console.Error.WriteLine("Usage: ReceiveLogsTopic [binding_key]...");
+                Console.Error.WriteLine("Erro");
                 Environment.Exit(1);
             }
 
             foreach (String bindingKey in topicos)
             {
-                channel.QueueBind(queueName, EXCHANGE_NAME, bindingKey);
+                channel.QueueBind(queueName, EXCHANGE, bindingKey);
             }
 
-            Console.WriteLine(" [*] MONITORANDO. Para parar pressione CTRL+C");
+            Console.WriteLine("MONITORANDO. Para parar pressione CTRL+C");
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
@@ -164,7 +159,7 @@ namespace TrabHugo
                 }
                 else
                 {
-                    Console.WriteLine(" [x] Recebida -> '" + ea.RoutingKey + "_<" + message + ">'");
+                    Console.WriteLine("Recebida: '" + ea.RoutingKey + "_<" + message + ">'");
                     codigo = "";
                 }
             };
@@ -173,41 +168,31 @@ namespace TrabHugo
                                  consumer: consumer);
         }
 
-        // REQUISITA OPERAÇÕES PARA A BOLSA
-        public static void enviarOperacao(String[] operacao)
+        // REQUISITA OPERAÇÕES
+        public static void enviar(String[] operacao)
         {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
             channel.QueueDeclare("BROKER", true, false, false, null);
 
-            String message = getRouting(operacao);
-            message += "_" + getMessage(operacao);
+            string message = "";
+            if (operacao.Length < 1)
+                message = "Anonimo";
+            else
+                message = operacao[0];
 
+            if (operacao.Length < 2)
+                message += "_" + "Nada";
+            else
+                message += "_" + juntasStrings(operacao, ";", 1);
             channel.BasicPublish("", "BROKER", null, Encoding.UTF8.GetBytes(message));
 
-            Console.WriteLine(" [x] Enviada -> '<" + message + ">'");
-        }
-
-
-        // AUXILIAR
-        private static string getRouting(String[] strings)
-        {
-            if (strings.Length < 1)
-                return "anonymous.info";
-            return strings[0];
+            Console.WriteLine("Enviada: '<" + message + ">'");
         }
 
         // AUXILIAR
-        private static string getMessage(String[] strings)
-        {
-            if (strings.Length < 2)
-                return "Nenhuma";
-            return joinStrings(strings, ";", 1);
-        }
-
-        // AUXILIAR
-        private static string joinStrings(String[] strings, String delimiter, int startIndex)
+        private static string juntasStrings(String[] strings, String delimitador, int startIndex)
         {
             int length = strings.Length;
             if (length == 0)
@@ -217,7 +202,7 @@ namespace TrabHugo
             StringBuilder words = new StringBuilder(strings[startIndex]);
             for (int i = startIndex + 1; i < length; i++)
             {
-                words.Append(delimiter).Append(strings[i]);
+                words.Append(delimitador).Append(strings[i]);
             }
             return words.ToString();
         }
@@ -226,7 +211,7 @@ namespace TrabHugo
         {
             try
             {
-                receberNotificacoes(new String[] { codigo });
+                receber(new String[] { codigo });
             }
             catch (Exception e)
             {
